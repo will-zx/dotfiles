@@ -1,6 +1,6 @@
 # Dotfiles
 
-Sway + Waybar environment config.
+Swaywm dotfiles
 
 ## Packages needed
 
