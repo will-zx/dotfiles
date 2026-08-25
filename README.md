@@ -15,10 +15,17 @@ sudo pacman -S sway swayidle swaylock swaybg waybar mako rofi grim slurp \
 ## Install
 
 ```bash
-git clone https://github.com/<username>/dotfiles.git ~/dotfiles
+git clone https://github.com/will-zx/dotfiles.git ~/dotfiles
 cd ~/dotfiles
 chmod +x install.sh
 ./install.sh
+```
+
+## Uninstall
+
+```bash
+cd ~/dotfiles
+./uninstall.sh
 ```
 
 ## Structure
