@@ -1,0 +1,61 @@
+# ============================================
+# Swaylock - Arc Dark / Papirus Dark
+# ============================================
+
+# Background
+color=2F343F
+
+# Indicator
+indicator-radius=80
+indicator-thickness=8
+
+# Default state
+inside-color=383C4A
+ring-color=5294E2
+line-color=2F343F
+separator-color=2F343F
+
+# Text
+text-color=D3DAE3
+
+# Key press
+key-hl-color=D3DAE3
+
+# Clear / empty state
+inside-clear-color=383C4A
+ring-clear-color=5294E2
+line-clear-color=383C4F
+text-clear-color=D3DAE3
+
+# Verifying
+inside-ver-color=383C4A
+ring-ver-color=5294E2
+line-ver-color=383C4F
+text-ver-color=D3DAE3
+
+# Wrong password
+inside-wrong-color=383C4A
+ring-wrong-color=E85D75
+line-wrong-color=383C4F
+text-wrong-color=F28F9D
+
+# Caps Lock
+inside-caps-lock-color=383C4A
+ring-caps-lock-color=E5A65A
+line-caps-lock-color=383C4F
+text-caps-lock-color=E5A65A
+
+# Backspace
+bs-hl-color=E85D75
+caps-lock-bs-hl-color=E5A65A
+caps-lock-key-hl-color=E5A65A
+
+# Layout indicator
+layout-bg-color=383C4A
+layout-border-color=5294E2
+layout-text-color=D3DAE3
+
+# Behavior
+show-failed-attempts
+hide-keyboard-layout
+disable-caps-lock-text

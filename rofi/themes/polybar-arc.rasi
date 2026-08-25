@@ -1,0 +1,141 @@
+/************************************************
+ * ROFI theme: polybar-arc
+ * Dibuat oleh setup-rofi-polybar.sh
+ * Palet & gaya: ~/.config/polybar/config.ini
+ ************************************************/
+
+* {
+    /* ---- palet polybar ---- */
+    background:          #2f343f;
+    background-alt:      #383c4a;
+    foreground:          #f3f4f5;
+    foreground-alt:      #8c9196;
+    primary:             #5294e2;
+    secondary:           #4080d0;
+    alert:               #cc575d;
+    separator:           #1d1f21;
+
+    /* ---- status elemen list ---- */
+    normal-background:   transparent;
+    normal-foreground:   @foreground;
+    selected-background: @primary;
+    selected-foreground: @background;
+    urgent-background:   @alert;
+    urgent-foreground:   @foreground;
+    active-background:   @secondary;
+    active-foreground:   @background;
+
+    spacing:   2px;
+    font:      "Noto Sans 11";
+}
+
+/* jendela launcher: tengah-atas, radius 0 (seperti bar polybar) */
+window {
+    background-color: @background;
+    border-radius:    0px;
+    border:           0px;
+    padding:          6px;
+    width:            38%;
+    height:           42%;
+    location:         north;
+    anchor:           north;
+}
+
+mainbox {
+    border:  0px;
+    padding: 0px;
+}
+
+/* baris input: bg alt + underline biru 2px (gaya modul polybar) */
+inputbar {
+    children:        [ prompt, entry, case-indicator ];
+    background-color: @background-alt;
+    padding:          8px;
+    spacing:          8px;
+    border-bottom:    2px;
+    border-color:     @primary;
+}
+
+prompt,
+entry,
+case-indicator {
+    text-color: @foreground;
+}
+
+/* daftar hasil */
+listview {
+    lines:        8;
+    fixed-height: true;
+    columns:      1;
+    padding:      6px 0px 0px 0px;
+    spacing:      2px;
+    scrollbar:    false;
+}
+
+element {
+    padding: 8px;
+}
+
+element-text {
+    text-color: @foreground;
+}
+
+element.normal.normal {
+    background-color: @normal-background;
+    text-color:       @normal-foreground;
+}
+
+element.selected.normal {
+    background-color: @selected-background;
+    text-color:       @selected-foreground;
+}
+
+element.normal.urgent {
+    background-color: @urgent-background;
+    text-color:       @urgent-foreground;
+}
+
+element.selected.urgent {
+    background-color: @urgent-background;
+    text-color:       @urgent-foreground;
+}
+
+element.normal.active {
+    background-color: @active-background;
+    text-color:       @active-foreground;
+}
+
+element.selected.active {
+    background-color: @active-background;
+    text-color:       @active-foreground;
+}
+
+element alternate normal {
+    background-color: transparent;
+}
+
+/* tombol ganti mode (bawah) */
+mode-switcher {
+    border:  0px;
+    padding: 4px;
+}
+
+button {
+    text-color: @foreground-alt;
+    padding:    6px;
+}
+
+button.selected {
+    background-color: @selected-background;
+    text-color:       @selected-foreground;
+}
+
+/* pesan error / info */
+message {
+    border:  0px;
+    padding: 4px;
+}
+
+textbox {
+    text-color: @foreground;
+}

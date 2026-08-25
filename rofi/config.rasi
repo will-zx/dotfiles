@@ -1,0 +1,39 @@
+configuration {
+    /* config rofi 2.0 — dibuat oleh setup-rofi-polybar.sh */
+
+    modes: [ window, drun, run ];
+    font:  "SF Pro Display 12";
+
+    show-icons:      true;
+    icon-theme:      "Papirus-Dark";
+    hover-select:    true;
+    click-to-exit:   true;
+    case-sensitive:  false;
+    sorting-method:  "normal";
+
+    /* label tombol mode (polos, aman tanpa glyph) */
+    display-window:  "Windows";
+    display-drun:    "Apps";
+    display-run:     "Run";
+
+    /* format baris hasil: ikon + jarak + nama */
+    drun-display-format: "{icon}  {name}";
+    window-format:       "{icon}  {name}";
+}
+
+/* mode timeout (default: Esc membatalkan) */
+timeout {
+    action: "kb-cancel";
+    delay:  0;
+}
+
+/* mode filebrowser (klik folder / cari file) */
+filebrowser {
+    directories-first: true;
+    sorting-method:    "name";
+}
+
+/* muat tema bergaya polybar */
+//@theme "polybar-arc"
+
+@theme "/usr/share/rofi/themes/Arc-Dark.rasi"
