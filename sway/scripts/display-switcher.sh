@@ -1,44 +1,68 @@
 #!/usr/bin/env bash
-# Display mode switcher untuk i3 (X11/xrandr)
+# Display mode switcher untuk Sway (Wayland/swaymsg)
+# Menggantikan versi i3/xrandr yang hanya jalan di X11.
+
 INTERNAL="eDP-1"
-EXTERNAL=$(xrandr | grep " connected" | grep -v "$INTERNAL" | awk '{print $1}')
+
+get_external() {
+    # Ambil output aktif yang bukan internal
+    swaymsg -t get_outputs | python3 -c "
+import sys, json
+for o in json.load(sys.stdin):
+    if o.get('name') != '$INTERNAL' and o.get('active'):
+        print(o['name'])
+        break
+"
+}
 
 notify() {
     notify-send "Display" "$1"
 }
 
+EXTERNAL=$(get_external)
+
 if [ -z "$EXTERNAL" ]; then
-    xrandr --output "$INTERNAL" --auto --primary
+    swaymsg output "$INTERNAL" enable mode --get-preferred
     notify "Tidak ada display eksternal, hanya laptop"
     exit 0
 fi
 
-EXT_MODE=$(xrandr | grep -A 1 "^$EXTERNAL connected" | tail -1 | grep -oP '\d+x\d+' | head -1)
-[ -z "$EXT_MODE" ] && EXT_MODE="1920x1080"
-
 case "$1" in
     "mirror")
-        xrandr --output "$INTERNAL" --mode "$EXT_MODE" --primary --output "$EXTERNAL" --mode "$EXT_MODE" --same-as "$INTERNAL"
-        notify "Mirror ke $EXTERNAL ($EXT_MODE)"
+        swaymsg output "$EXTERNAL" mode --get-preferred
+        swaymsg output "$EXTERNAL" enable
+        # Sway tidak punya 'same-as'; gunakan posisi yang sama (atas kiri)
+        swaymsg output "$EXTERNAL" position 0 0
+        swaymsg output "$INTERNAL" position 0 0
+        notify "Mirror ke $EXTERNAL"
         ;;
     "extend-right")
-        xrandr --output "$INTERNAL" --auto --primary --output "$EXTERNAL" --auto --right-of "$INTERNAL"
+        swaymsg output "$EXTERNAL" enable mode --get-preferred
+        swaymsg output "$EXTERNAL" position 1920 0
+        swaymsg output "$INTERNAL" enable mode --get-preferred position 0 0
         notify "Extend ke kanan: $EXTERNAL"
         ;;
     "extend-left")
-        xrandr --output "$INTERNAL" --auto --primary --output "$EXTERNAL" --auto --left-of "$INTERNAL"
+        swaymsg output "$EXTERNAL" enable mode --get-preferred
+        swaymsg output "$INTERNAL" position 1920 0
+        swaymsg output "$EXTERNAL" position 0 0
         notify "Extend ke kiri: $EXTERNAL"
         ;;
     "external-only")
-        xrandr --output "$INTERNAL" --off --output "$EXTERNAL" --auto --primary
+        swaymsg output "$INTERNAL" disable
+        swaymsg output "$EXTERNAL" enable mode --get-preferred position 0 0
         notify "Proyektor only: $EXTERNAL"
         ;;
     "internal-only")
-        xrandr --output "$INTERNAL" --auto --primary --output "$EXTERNAL" --off
+        swaymsg output "$EXTERNAL" disable
+        swaymsg output "$INTERNAL" enable mode --get-preferred position 0 0
         notify "Laptop only"
         ;;
     *)
-        xrandr --output "$INTERNAL" --mode "$EXT_MODE" --primary --output "$EXTERNAL" --mode "$EXT_MODE" --same-as "$INTERNAL"
-        notify "Auto Mirror ke $EXTERNAL ($EXT_MODE)"
+        swaymsg output "$EXTERNAL" mode --get-preferred
+        swaymsg output "$EXTERNAL" enable
+        swaymsg output "$EXTERNAL" position 0 0
+        swaymsg output "$INTERNAL" position 0 0
+        notify "Auto Mirror ke $EXTERNAL"
         ;;
 esac

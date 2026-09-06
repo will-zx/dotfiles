@@ -4,7 +4,7 @@
 # ==============================================================================
 
 # Font & format teks (menyamakan dengan dunst/i3)
-font=SF Pro Display 9
+font=Ubuntu 9
 markup=1
 format=<b>%s</b>\n%b
 

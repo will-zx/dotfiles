@@ -2,7 +2,7 @@ configuration {
     /* config rofi 2.0 — dibuat oleh setup-rofi-polybar.sh */
 
     modes: [ window, drun, run ];
-    font:  "SF Pro Display 12";
+    font:  "Ubuntu 12";
 
     show-icons:      true;
     icon-theme:      "Papirus-Dark";

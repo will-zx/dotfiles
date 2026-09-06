@@ -45,7 +45,6 @@ Swaywm dotfiles.
 | `polkit-gnome` | Authentication dialog for privilege escalation |
 | `blueman` | Bluetooth manager |
 | `network-manager-applet` | NetworkManager tray applet |
-| `arandr` | GUI display configuration (mirror/extend) |
 | `gnome-calculator` | Calculator |
 
 ### Desktop Integration
@@ -58,19 +57,28 @@ Swaywm dotfiles.
 
 ### Theme & Fonts
 
-| Package | Description |
+| Package/Repo | Description |
 |---|---|
-| `arc-gtk-theme` | GTK theme (Arc-Dark) |
+| [jnsh/arc-theme](https://github.com/jnsh/arc-theme) | GTK 2/3/4 theme (Arc-Dark) — build from source, **not** in official repos |
 | `papirus-icon-theme` | Icon theme (Papirus-Dark) |
 | `ttf-nerd-fonts-symbols` | Icons for waybar and rofi |
+| `ttf-ubuntu-font-family` | UI font (Ubuntu) |
+| `ttf-jetbrains-mono` | Terminal font (kitty) |
 | `noto-fonts` | Base font family |
 
 ```bash
 sudo pacman -S sway swayidle swaylock swaybg waybar mako rofi kitty \
   grim slurp wl-clipboard cliphist pavucontrol brightnessctl \
-  polkit-gnome blueman network-manager-applet arandr gnome-calculator \
+  polkit-gnome blueman network-manager-applet gnome-calculator \
   xdg-desktop-portal xdg-desktop-portal-gtk python3 \
-  arc-gtk-theme papirus-icon-theme ttf-nerd-fonts-symbols noto-fonts
+  papirus-icon-theme ttf-nerd-fonts-symbols noto-fonts \
+  ttf-ubuntu-font-family ttf-jetbrains-mono
+
+# Arc-Dark build from source (jnsh fork, supports GTK4):
+#   git clone --depth 1 https://github.com/jnsh/arc-theme /tmp/arc-theme
+#   cd /tmp/arc-theme
+#   meson setup --prefix=/usr -Dvariants=dark -Dthemes=gtk2,gtk3,gtk4 build/
+#   ninja -C build/ && sudo meson install -C build/
 ```
 
 ## Install
@@ -135,7 +143,7 @@ cd ~/dotfiles
 
 | Key | Action |
 |---|---|
-| `$mod+Shift+d` | Open display config GUI (arandr) |
+| `$mod+Shift+d` | Toggle laptop ↔ mirror external |
 | `$mod+Alt+d` | Toggle laptop ↔ mirror external |
 | `$mod+F1` | Mirror to projector |
 | `$mod+F2` | Extend right |
@@ -213,10 +221,16 @@ dotfiles/
 │       ├── network.sh
 │       ├── network-menu.sh
 │       └── network-speed.py
+├── kitty/kitty.conf
 ├── swaylock/config
 ├── mako/config
 ├── rofi/
 │   ├── config.rasi
 │   └── themes/polybar-arc.rasi
-└── gtk-3.0/settings.ini
+├── gtk-3.0/settings.ini
+├── gtk-4.0/settings.ini
+├── qt5ct/qt5ct.conf
+├── qt6ct/qt6ct.conf
+├── environment.d/desktop.conf
+└── gtkrc-2.0
 ```

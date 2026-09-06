@@ -3,13 +3,24 @@
 # ==============================================================================
 set $mod Mod4
 #set $mod Mod1
-font pango:SF Pro Display 10
+font pango:Ubuntu 10
 floating_modifier $mod
 
 # Cursor
 seat * xcursor_theme macOS-White 24
 exec dbus-update-activation-environment --systemd XCURSOR_THEME XCURSOR_SIZE
 exec_always systemctl --user import-environment XCURSOR_THEME XCURSOR_SIZE
+
+# Environment variables — propagate to systemd user bus
+exec dbus-update-activation-environment --systemd QT_QPA_PLATFORMTHEME WLR_NO_HARDWARE_CURSORS XCURSOR_THEME XCURSOR_SIZE WAYLAND_DISPLAY DISPLAY
+exec_always systemctl --user import-environment QT_QPA_PLATFORMTHEME WLR_NO_HARDWARE_CURSORS WAYLAND_DISPLAY DISPLAY
+
+# Qt5/Qt6 apps — qt5ct qt6ct manages style (Fusion dark + Papirus-Dark icons)
+set $env:QT_QPA_PLATFORMTHEME qt5ct
+
+# Hybrid offload: kompositor/layar di iGPU (Intel). TIDAK memakai GBM_BACKEND=nvidia-drm
+# global utk hindari GL iGPU rusak. dGPU dipakai hanya per-app via `prime-run` (lihat skrip).
+set $env:WLR_NO_HARDWARE_CURSORS 1
 
 # Define names for default workspaces for which we configure key bindings later on.
 # We use variables to avoid repeating the names in multiple places.
@@ -57,11 +68,7 @@ input type:touchpad {
     accel_profile adaptive
 }
 
-# XDG Desktop Portal (frontend + backend gtk) — wajib jalan sebelum aplikasi
-# GTK4 4.22 tidak punya fallback GSettings; warna gelap libadwaita hanya
-# dibaca lewat interface org.freedesktop.portal.Settings.
-exec --no-startup-id sh -c 'pgrep -f "^/usr/lib/xdg-desktop-portal$" >/dev/null 2>&1 || /usr/lib/xdg-desktop-portal'
-exec --no-startup-id sh -c 'pgrep -f "^/usr/lib/xdg-desktop-portal-gtk$" >/dev/null 2>&1 || /usr/lib/xdg-desktop-portal-gtk'
+# XDG Desktop Portal — auto-started by systemd (D-Bus activation)
 
 # Waybar (pengganti polybar) — guard anti-duplikat
 #exec --no-startup-id sh -c 'pgrep -x waybar >/dev/null 2>&1 || LC_TIME=id_ID.UTF-8 waybar'
@@ -71,13 +78,10 @@ exec_always --no-startup-id sh -c 'pgrep -x waybar >/dev/null 2>&1 || LC_TIME=id
 # Mako notification daemon (pengganti dunst) — guard anti-duplikat
 exec --no-startup-id sh -c 'pgrep -x mako >/dev/null 2>&1 || mako'
 
-# Audio (PipeWire) — guard: hanya start bila belum berjalan
-exec --no-startup-id sh -c 'pgrep -x pipewire >/dev/null 2>&1 || pipewire'
-exec --no-startup-id sh -c 'pgrep -x wireplumber >/dev/null 2>&1 || wireplumber'
-exec --no-startup-id sh -c 'pgrep -x pipewire-pulse >/dev/null 2>&1 || pipewire-pulse'
+# Audio (PipeWire) — managed by systemd user services
 
-# Idle & screen lock (swayidle + swaylock) — matikan layar setelah 11 menit idle
-exec_always --no-startup-id sh -c 'pgrep -x swayidle >/dev/null 2>&1 || swayidle -w timeout 600 "swaylock -f" timeout 660 "swaymsg output * dpms off" resume "swaymsg output * dpms on"'
+# Idle & screen lock (swayidle + swaylock) — DILIHAP: tidak pernah tinggal laptop menyala
+#exec_always --no-startup-id sh -c 'pgrep -x swayidle >/dev/null 2>&1 || swayidle -w timeout 600 "swaylock -f" timeout 660 "swaymsg output * dpms off" resume "swaymsg output * dpms on"'
 
 
 # cliphist: merekam semua salinan ke history via wl-paste --watch
@@ -115,28 +119,32 @@ client.urgent            $urgent-bg-color    $urgent-bg-color    $urgent-text-co
 
 # Enable Floating Mode for Specific Programs
 for_window [class="VirtualBox" instance="VirtualBox" title="New Virtual Machine"] floating enable
-for_window [class="steam" instance="steamwebhelper"] floating enable, move position center
+for_window [class="steam" instance="steamwebhelper" title="Steam Settings"] floating enable
+for_window [class="steam" instance="steamwebhelper"] floating disable
 for_window [class="ibus"] floating enable
 
 # Aturan untuk aplikasi Wayland-native (class tidak cocok, pakai app_id)
+for_window [app_id="^(W|w)aydroid"] floating enable, resize set width 33 ppt height 100 ppt, move position center
 for_window [app_id="blueman-manager" title="Bluetooth Devices"] floating enable, resize set 800 600
 for_window [app_id="org.pulseaudio.pavucontrol"] floating enable, resize set 800 600
 for_window [app_id="nm-connection-editor"] floating enable, resize set 800 600
-for_window [app_id="nvidia-settings"] floating enable, resize set 800 600
 for_window [app_id="io.github.nozwock.Packet" title="Packet"] floating enable
-for_window [app_id="^(W|w)aydroid"] floating enable, resize set width 33 ppt height 100 ppt, move position center
 for_window [app_id="thunar" title="Confirm to replace files"] floating enable
 for_window [app_id="thunar" title="File Operation Progress"] floating enable
+for_window [app_id="nvidia-settings"] floating enable, resize set 800 600
 for_window [app_id="blueman-manager" title="blueman"] floating enable
 for_window [app_id="Zotero" title="Software Update"] floating enable
 for_window [app_id="Zotero" title="Zotero Settings"] floating enable
+for_window [app_id="xarchiver"] floating enable, resize set 800 600
+for_window [app_id="xdg-desktop-portal-gtk"] flating enable
 for_window [app_id="simplescreenrecorder"] floating enable
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="kitty" title="^.*"] floating disable
-for_window [app_id="lxappearance"] floating enable
-for_window [app_id="arandr"] floating enable
 for_window [app_id="qt5ct"] floating enable
 for_window [app_id="qt6ct"] floating enable
+
+# By title
+for_window [title="Task Manager - Chromium"] floating enable
 
 # ==============================================================================
 # 4. HARDWARE CONTROLS (Media Keys / Kontrol Perangkat Keras)
@@ -145,6 +153,11 @@ bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
 bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
 bindsym XF86AudioMicMute exec --no-startup-id pactl set-source-mute @DEFAULT_SOURCE@ toggle
+
+# Kontrol Media (Fn+F8 prev, Fn+F9 play/pause, Fn+F10 next)
+bindsym XF86AudioPrev exec --no-startup-id playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
+bindsym XF86AudioNext exec --no-startup-id playerctl next
 
 # Kontrol Brightness
 bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
@@ -201,14 +214,14 @@ bindsym $mod+Shift+Print exec --no-startup-id sh -c 'grim -g "$(slurp)" - | wl-c
 # gnome-calculator
 bindsym XF86Calculator exec --no-startup-id gnome-calculator
 
-# arandr
-bindsym $mod+Shift+d exec --no-startup-id arandr
+# Display toggle (Sway native)
+bindsym $mod+Shift+d exec --no-startup-id ~/.config/sway/scripts/display-toggle.sh
 
 # Shutdown laptop
 bindsym $mod+Shift+x exec --no-startup-id ~/.config/sway/scripts/power-menu.sh
 
-# Kunci layar (swaylock)
-bindsym $mod+Escape exec --no-startup-id swaylock -f
+# Kunci layar (swaylock) — DILIHAP
+#bindsym $mod+Escape exec --no-startup-id swaylock -f
 
 # ==============================================================================
 # 6. WINDOW MANAGEMENT & NAVIGATION (Navigasi & Tata Letak Jendela)

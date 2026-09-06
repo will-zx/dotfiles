@@ -51,9 +51,20 @@ unlink_or_restore "$XDG_CONFIG_HOME/mako/config"
 unlink_or_restore "$XDG_CONFIG_HOME/rofi/config.rasi"
 unlink_or_restore "$XDG_CONFIG_HOME/rofi/themes"
 
+# Kitty
+unlink_or_restore "$XDG_CONFIG_HOME/kitty/kitty.conf"
+
 # GTK
 unlink_or_restore "$HOME/.gtkrc-2.0"
 unlink_or_restore "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
+unlink_or_restore "$XDG_CONFIG_HOME/gtk-4.0/settings.ini"
+
+# Qt (qt5ct / qt6ct)
+unlink_or_restore "$XDG_CONFIG_HOME/qt5ct/qt5ct.conf"
+unlink_or_restore "$XDG_CONFIG_HOME/qt6ct/qt6ct.conf"
+
+# Environment
+unlink_or_restore "$XDG_CONFIG_HOME/environment.d/desktop.conf"
 
 echo ""
 echo "Done. Reload sway or log out to apply."

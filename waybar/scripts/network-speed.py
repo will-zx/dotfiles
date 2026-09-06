@@ -1,18 +1,34 @@
 #!/usr/bin/env python3
+import glob
 import json
+import os
 import time
-
-IFACE = "wlan0"
-RX_PATH = f"/sys/class/net/{IFACE}/statistics/rx_bytes"
-TX_PATH = f"/sys/class/net/{IFACE}/statistics/tx_bytes"
 
 DOWN_ICON = "\u2193"
 UP_ICON = "\u2191"
 
 
-def read(path):
-    with open(path) as f:
-        return int(f.read().strip())
+def find_iface():
+    for path in sorted(glob.glob("/sys/class/net/*/operstate")):
+        with open(path) as f:
+            if f.read().strip() == "up":
+                return path.split("/")[4]
+    for name in ("wlp4s0", "wlan0", "eth0", "eno1"):
+        if os.path.exists(f"/sys/class/net/{name}"):
+            return name
+    return None
+
+
+def read_bytes(iface):
+    base = f"/sys/class/net/{iface}/statistics"
+    try:
+        with open(f"{base}/rx_bytes") as f:
+            rx = int(f.read().strip())
+        with open(f"{base}/tx_bytes") as f:
+            tx = int(f.read().strip())
+        return rx, tx
+    except FileNotFoundError:
+        return 0, 0
 
 
 def human(bps):
@@ -34,11 +50,18 @@ def emit(down, up):
 
 
 def main():
-    prev_rx, prev_tx = read(RX_PATH), read(TX_PATH)
+    iface = find_iface()
+    if not iface:
+        emit(0, 0)
+        while True:
+            time.sleep(5)
+            emit(0, 0)
+        return
+    prev_rx, prev_tx = read_bytes(iface)
     emit(0, 0)
     while True:
         time.sleep(1)
-        rx, tx = read(RX_PATH), read(TX_PATH)
+        rx, tx = read_bytes(iface)
         down = max(0, rx - prev_rx)
         up = max(0, tx - prev_tx)
         prev_rx, prev_tx = rx, tx

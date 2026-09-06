@@ -6,11 +6,11 @@ choice=$(printf "Matikan (Shutdown)\nRestart\nLogout\nBatal" | rofi -dmenu -p "P
 case "$choice" in
   "Matikan (Shutdown)")
     notify-send -t 2000 "Power" "Shutdown... babay 👋"
-    loginctl poweroff 2>/dev/null || openrc-shutdown --poweroff 2>/dev/null || poweroff
+    systemctl poweroff
     ;;
   "Restart")
     notify-send -t 2000 "Power" "Restart..."
-    loginctl reboot 2>/dev/null || openrc-shutdown --reboot 2>/dev/null || reboot
+    systemctl reboot
     ;;
   "Logout")
     swaymsg exit
