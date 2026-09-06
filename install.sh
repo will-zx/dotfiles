@@ -38,9 +38,33 @@ link "$DOTFILES/mako/config"       "$XDG_CONFIG_HOME/mako/config"
 link "$DOTFILES/rofi/config.rasi"  "$XDG_CONFIG_HOME/rofi/config.rasi"
 link "$DOTFILES/rofi/themes"       "$XDG_CONFIG_HOME/rofi/themes"
 
+# Kitty
+link "$DOTFILES/kitty/kitty.conf"  "$XDG_CONFIG_HOME/kitty/kitty.conf"
+
 # GTK
 link "$DOTFILES/gtkrc-2.0"         "$HOME/.gtkrc-2.0"
 link "$DOTFILES/gtk-3.0/settings.ini" "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
+link "$DOTFILES/gtk-3.0/bookmarks"    "$XDG_CONFIG_HOME/gtk-3.0/bookmarks"
+link "$DOTFILES/gtk-4.0/settings.ini" "$XDG_CONFIG_HOME/gtk-4.0/settings.ini"
+
+# Qt (qt5ct / qt6ct)
+link "$DOTFILES/qt5ct/qt5ct.conf"  "$XDG_CONFIG_HOME/qt5ct/qt5ct.conf"
+link "$DOTFILES/qt6ct/qt6ct.conf"  "$XDG_CONFIG_HOME/qt6ct/qt6ct.conf"
+
+# Environment (systemd-user)
+link "$DOTFILES/environment.d/desktop.conf" "$XDG_CONFIG_HOME/environment.d/desktop.conf"
+
+# macOS-White cursor theme → shared icons
+mkdir -p "$HOME/.local/share/icons"
+if [ -e "$HOME/.local/share/icons/macOS-White" ] && [ ! -L "$HOME/.local/share/icons/macOS-White" ]; then
+    echo "  backing up cursor theme → macOS-White.bak"
+    mv "$HOME/.local/share/icons/macOS-White" "$HOME/.local/share/icons/macOS-White.bak"
+fi
+rm -f "$HOME/.local/share/icons/macOS-White"
+ln -sf "$DOTFILES/macOS-White" "$HOME/.local/share/icons/macOS-White"
+echo "  linked cursor theme → $HOME/.local/share/icons/macOS-White"
 
 echo ""
 echo "Done. Reload sway: \$mod+Shift+c"
+echo "Reload env: systemctl --user import-environment; " \
+     "logind configure-editor or re-login needed for environment.d"
