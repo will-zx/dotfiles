@@ -43,7 +43,9 @@ dotfiles/
 │   └── kitty.conf      # terminal kitty
 ├── lightdm/
 │   ├── lightdm-gtk-greeter.conf   # greeter (tema, font SF Pro, clock)
-│   └── lightdm-gtk-greeter.css    # styling Arc-Dark untuk greeter
+│   ├── gtk.css                    # CSS theme greeter (GTK theme turunan)
+│   └── index.theme
+├── wallpapers/                    # wallpaper (dipakai sway & lightdm)
 ├── macOS-White/        # tema cursor (kursor putih ala macOS)
 │   ├── index.theme
 │   ├── cursor.theme
@@ -101,11 +103,29 @@ dotfiles/
 | `environment.d/desktop.conf` | `~/.config/environment.d/desktop.conf` |
 | `macOS-White` | `~/.local/share/icons/macOS-White` |
 
-> **lightdm** tidak dipasang via symlink (butuh root). `install.sh`
-> otomatis memasang `lightdm-gtk-greeter.conf` + `lightdm-gtk-greeter.css`
-> ke `/etc/lightdm/` bila dijalankan sebagai root; kalau tidak, skrip
-> menampilkan perintahnya untuk dijalankan manual dengan `sudo`.
-> Ubah path `background=` sesuai wallpaper user.
+> **lightdm** tidak dipasang via symlink (butuh root). `install.sh` memanggil
+> `sudo` tepat di baris ini (minta password), lalu memasang theme GTK
+> turunan `Arc-Dark-Greeter` ke `/usr/share/themes/` beserta
+> `lightdm-gtk-greeter.conf` ke `/etc/lightdm/`. Kalau `sudo` gagal atau
+> dibatalkan, install tetap lanjut.
+>
+> **Styling greeter lewat GTK theme, bukan file `.css` terpisah.**
+> lightdm-gtk-greeter 2.0.9 memuat CSS dari dalam binary
+> (`gtk_css_provider_load_from_data`), sehingga file `.css` terpisah di
+> `/etc/lightdm/` tidak pernah dibaca. Theme turunan wajib menyalin
+> `gtk.gresource` milik Arc-Dark, kalau tidak resource
+> `/org/gnome/arc-theme/...` tidak resolve dan `@import` gagal.
+>
+> Catatan penulisan CSS greeter (terverifikasi di GTK 3.24): `login_window`
+> & `panel_window` di glade greeter adalah **GtkEventBox** (container),
+> sedangkan selector **ID** (`#login_window`) hanya match untuk widget
+> **leaf**. Style written per tipe widget (`entry {}`, `label {}`,
+> `button {}`) plus `.lightdm-gtk-greeter` untuk window background.
+> Detail lengkap ada di komentar `lightdm/gtk.css`.
+>
+> Wallpaper ada di `wallpapers/` dalam repo ini. Path `background=` di
+> `lightdm-gtk-greeter.conf` harus absolut karena greeter berjalan
+> sebagai user sistem (tidak bisa pakai `$HOME`).
 
 Untuk file yang sudah ada di sistem saat install, `install.sh` otomatis
 membackup-nya menjadi `*.bak` (misal `settings.ini.bak`), dan `uninstall.sh`

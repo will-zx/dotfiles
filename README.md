@@ -243,7 +243,9 @@ dotfiles/
 │   └── themes/polybar-arc.rasi
 ├── lightdm/
 │   ├── lightdm-gtk-greeter.conf
-│   └── lightdm-gtk-greeter.css
+│   ├── gtk.css            # CSS theme greeter (GTK theme turunan)
+│   └── index.theme
+├── wallpapers/            # wallpaper (dipakai sway & lightdm)
 ├── macOS-White/          # cursor theme (symlink ke ~/.local/share/icons)
 ├── gtk-3.0/
 │   ├── settings.ini

@@ -80,5 +80,35 @@ else
     echo "  skipped $CURSOR_LINK (not a symlink)"
 fi
 
+# LightDM greeter — theme turunan + conf di /etc (butuh root).
+# Hapus theme dulu supaya conf tidak menunjuk theme yang sudah hilang.
+GREETER_THEME_DIR="/usr/share/themes/Arc-Dark-Greeter"
+if [ -d "$GREETER_THEME_DIR" ]; then
+    if [ "$(id -u)" -eq 0 ]; then
+        rm -rf "$GREETER_THEME_DIR"
+        echo "  removed $GREETER_THEME_DIR"
+    elif command -v sudo >/dev/null 2>&1 && sudo -v; then
+        sudo rm -rf "$GREETER_THEME_DIR"
+        echo "  removed $GREETER_THEME_DIR"
+    else
+        echo "  [skip] $GREETER_THEME_DIR (sudo gagal / dibatalkan)"
+    fi
+fi
+
+# Conf greeter: install.sh meng-overwrite /etc/lightdm/lightdm-gtk-greeter.conf
+# tanpa backup, jadi tidak ada .bak untuk direstore. Cukup dihapus supaya
+# lightdm jatuh ke konfigurasi default paket.
+if [ -f /etc/lightdm/lightdm-gtk-greeter.conf ]; then
+    if [ "$(id -u)" -eq 0 ]; then
+        rm -f /etc/lightdm/lightdm-gtk-greeter.conf
+        echo "  removed /etc/lightdm/lightdm-gtk-greeter.conf"
+    elif command -v sudo >/dev/null 2>&1 && sudo -v; then
+        sudo rm -f /etc/lightdm/lightdm-gtk-greeter.conf
+        echo "  removed /etc/lightdm/lightdm-gtk-greeter.conf"
+    else
+        echo "  [skip] /etc/lightdm/lightdm-gtk-greeter.conf (sudo gagal / dibatalkan)"
+    fi
+fi
+
 echo ""
 echo "Done. Reload sway or log out to apply."

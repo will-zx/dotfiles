@@ -53,7 +53,7 @@ exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # Background Wallpaper (native sway, menggantikan feh)
 # Path wallpaper per-user, pakai $HOME agar portabel antar mesin.
-output * bg $HOME/Pictures/wallpaper/Joey-Jordison.jpg fill
+output * bg $HOME/dotfiles/wallpapers/wp6.jpg fill
 
 # CATATAN: jangan pakai 'workspace "N" output <output>' di sini.
 # Perintah itu bukan sekadar "pin", tapi juga memberi NAMA workspace pertama

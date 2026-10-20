@@ -1,0 +1,94 @@
+/*
+ * GTK theme turunan dari Arc-Dark, khusus untuk lightdm-gtk-greeter.
+ *
+ * Kenapa perlu tema turunan (bukan file .css terpisah)?
+ * lightdm-gtk-greeter 2.0.9 memuat CSS dari dalam binary
+ * (gtk_css_provider_load_from_data), bukan dari file .css eksternal.
+ * Jadi styling greeter harus lewat GTK theme — file gtk.css di dalam
+ * <theme>/gtk-3.0/ yang ditunjuk oleh key 'theme-name' di
+ * /etc/lightdm/lightdm-gtk-greeter.conf.
+ *
+ * @import di bawah menarik gtk-main-dark.css dari resource Arc-Dark.
+ * Resource itu hanya resolve bila gtk.gresource milik Arc-Dark ikut
+ * disalin ke direktori theme ini (install.sh yang menyalinnya).
+ *
+ * CARA MENYUSUN CSS DI SINI — semua diverifikasi empiris di GTK 3.24
+ * memakai struktur persis greeter
+ * (login_window GtkEventBox > content_frame Box > log_box Box > GtkEntry):
+ *
+ *   entry { ... }                        -> BEKERJA
+ *   #login_window entry { ... }          -> BEKERJA
+ *   eventbox entry { ... }               -> TIDAK BEKERJA
+ *   #login_window .entry { ... }         -> TIDAK BEKERJA
+ *
+ * Intinya:
+ *  - Selector TIPE (entry {}, label {}, button {}) selalu bekerja.
+ *  - Selector ID bekerja kalau langsung "descendant" dari ID
+ *    (#login_window entry), TIDAK kalau digabung dengan class
+ *    (#login_window .entry).
+ *  - "eventbox" bukan css-name yang bisa di-target: GtkEventBox
+ *    "menelan" child-nya, sehingga child bukan anak CSS ordinary.
+ *
+ * Warna ditulis sebagai hex langsung, BUKAN @define-color: di GTK 3.24
+ * @define-color yang lalu dipakai di selector memicu warning
+ * "is not a valid color name" (styling tetap apply, tapi lognya kotor).
+ *
+ * @define-color lightdm-gtk-greeter-override-defaults dari Arc-Dark
+ * yang dipakai: begitu color ini ada, fallback CSS bawaan greeter
+ * digeser ke priority FALLBACK sehingga tema ini yang menang.
+ */
+
+@import url("resource:///org/gnome/arc-theme/gtk-main-dark.css");
+
+/* --- Latar & window (style class yang ditambahkan greeter) ------------- */
+.lightdm-gtk-greeter {
+    background-color: #2f343f;
+    color: #d3dae3;
+}
+
+/* --- Kolom input user ----------------------------------------------- */
+entry {
+    color: #d3dae3;
+    background-color: #404552;
+    caret-color: #5294e2;
+    border: 1px solid #4b5162;
+    border-radius: 3px;
+    padding: 6px 8px;
+}
+
+entry:focus {
+    border-color: #5294e2;
+}
+
+/* --- Label (nama user, daftar sesi, dll) ---------------------------- */
+label {
+    color: #d3dae3;
+}
+
+/* --- Tombol (Sign In, Cancel, power menu) --------------------------- */
+button {
+    color: #ffffff;
+    background-color: #5294e2;
+    border: none;
+    border-radius: 3px;
+    padding: 6px 12px;
+    font-weight: bold;
+}
+
+button:hover {
+    background-color: #6ca4e8;
+}
+
+/* --- Panel atas (jam & indikator) -----------------------------------
+ * #panel_window adalah GtkEventBox (container), jadi ID selector
+ * hanya bisa sebagai "descendant" — bukan digabung dengan class.
+ * Rules tetap ditulis per-tipe supaya pasti bekerja. */
+#panel_window {
+    background-color: #2f343f;
+    color: #d3dae3;
+    font-weight: bold;
+}
+
+#panel_window label {
+    color: #d3dae3;
+}

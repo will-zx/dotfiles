@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Arc-Dark-Greeter
+Comment=Arc-Dark turunan untuk lightdm-gtk-greeter (styling login window & panel)
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+GtkTheme=Arc-Dark-Greeter
+MetacityTheme=Arc-Dark-Greeter
+IconTheme=Arc-Dark
+CursorTheme=macOS-White

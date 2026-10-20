@@ -64,18 +64,59 @@ rm -f "$HOME/.local/share/icons/macOS-White"
 ln -sf "$DOTFILES/macOS-White" "$HOME/.local/share/icons/macOS-White"
 echo "  linked cursor theme → $HOME/.local/share/icons/macOS-White"
 
-# LightDM greeter — butuh root, jadi opsional & tidak memblokir install.
-# Greeter membaca CSS dari /etc/lightdm/lightdm-gtk-greeter.css
+# LightDM greeter — butuh root, jadi pakai sudo (password diminta di titik ini).
+#
+# CATATAN: lightdm-gtk-greeter 2.0.9 memuat CSS dari dalam binary, bukan dari
+# file .css terpisah. Styling greeter harus lewat GTK theme, jadi install.sh
+# membangun theme turunan "Arc-Dark-Greeter" di /usr/share/themes/.
+#
+# sudo -v dipakai sekali: memvalidasi kredensial & meng-cache-nya, sehingga
+# perintah sudo berikutnya tidak meminta password lagi. Kalau sudo gagal atau
+# dibatalkan, install tetap lanjut (tidak abort).
+GREETER_THEME="Arc-Dark-Greeter"
+ARC_DARK_THEME_DIR="/usr/share/themes/Arc-Dark/gtk-3.0"
+GREETER_THEME_DIR="/usr/share/themes/$GREETER_THEME"
+
+install_greeter_theme() {
+    local dst="$1"
+
+    # Theme turunan wajib menyalin gtk.gresource Arc-Dark; tanpa itu resource
+    # /org/gnome/arc-theme/... tidak resolve dan @import di gtk.css gagal.
+    if [ ! -f "$ARC_DARK_THEME_DIR/gtk.gresource" ]; then
+        echo "  [skip] theme greeter: theme Arc-Dark tidak ditemukan"
+        echo "         (pasang Arc-Dark dulu: https://github.com/jnsh/arc-theme)"
+        return 1
+    fi
+
+    sudo install -d -m755 "$dst/gtk-3.0"
+    sudo install -m644 "$ARC_DARK_THEME_DIR/gtk.gresource" "$dst/gtk-3.0/gtk.gresource"
+    sudo install -m644 "$DOTFILES/lightdm/gtk.css" "$dst/gtk-3.0/gtk.css"
+    sudo install -m644 "$DOTFILES/lightdm/gtk.css" "$dst/gtk-3.0/gtk-dark.css"
+    sudo install -m644 "$DOTFILES/lightdm/index.theme" "$dst/index.theme"
+    return 0
+}
+
 if [ "$(id -u)" -eq 0 ]; then
-    install -Dm644 "$DOTFILES/lightdm/lightdm-gtk-greeter.conf" \
-        /etc/lightdm/lightdm-gtk-greeter.conf
-    install -Dm644 "$DOTFILES/lightdm/lightdm-gtk-greeter.css" \
-        /etc/lightdm/lightdm-gtk-greeter.css
-    echo "  installed lightdm greeter config + css → /etc/lightdm/"
+    # Sudah root: tidak perlu sudo.
+    if install_greeter_theme "$GREETER_THEME_DIR"; then
+        install -Dm644 "$DOTFILES/lightdm/lightdm-gtk-greeter.conf" \
+            /etc/lightdm/lightdm-gtk-greeter.conf
+        echo "  installed lightdm greeter theme + config"
+    fi
+elif command -v sudo >/dev/null 2>&1; then
+    echo "  lightdm greeter butuh root — diminta password sekarang:"
+    if sudo -v; then
+        if install_greeter_theme "$GREETER_THEME_DIR"; then
+            sudo install -Dm644 "$DOTFILES/lightdm/lightdm-gtk-greeter.conf" \
+                /etc/lightdm/lightdm-gtk-greeter.conf
+            echo "  installed lightdm greeter theme + config"
+        fi
+    else
+        echo "  [skip] lightdm greeter (sudo gagal / dibatalkan)"
+    fi
 else
-    echo "  [skip] lightdm greeter (butuh root). Jalankan manual:"
-    echo "         sudo install -Dm644 $DOTFILES/lightdm/lightdm-gtk-greeter.conf /etc/lightdm/lightdm-gtk-greeter.conf"
-    echo "         sudo install -Dm644 $DOTFILES/lightdm/lightdm-gtk-greeter.css  /etc/lightdm/lightdm-gtk-greeter.css"
+    echo "  [skip] lightdm greeter (sudo tidak tersedia)"
+    echo "         jalankan manual: sudo ./install.sh"
 fi
 
 echo ""
