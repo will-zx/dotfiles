@@ -2,10 +2,10 @@
 
 Swaywm dotfiles.
 
-![Screenshot desktop sway dengan waybar, rofi launcher, dan wallpaper Tux](docs/screenshot.png)
+![Screenshot desktop sway dengan waybar, rofi launcher, dan wallpaper Tux](docs/home.png)
 
 *Screenshot: sway + waybar (clock, network, audio, battery) + rofi launcher,
-kitty, Chromium, dan YouTube Music. Wallpaper `wallpapers/wp6.jpg`.*
+kitty, Opencode, dan pear-desktop. Wallpaper `wallpapers/wp6.jpg`.*
 
 ## Dependencies
 
@@ -260,7 +260,7 @@ dotfiles/
 ├── qt6ct/qt6ct.conf
 ├── environment.d/desktop.conf
 ├── docs/
-│   └── screenshot.png
+│   └── home.png
 ├── project.md
 └── gtkrc-2.0
 ```
