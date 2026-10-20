@@ -9,9 +9,11 @@ Swaywm dotfiles.
 | Package | Description |
 |---|---|
 | `sway` | Wayland tiling window manager |
-| `swayidle` | Idle management (auto-lock, DPMS) |
-| `swaylock` | Screen locker |
 | `swaybg` | Wallpaper setter |
+
+> `swayidle` & `swaylock` **tidak** dipakai: auto-lock & idle timeout sengaja
+> dimatikan di `sway/config`. `swaylock/config` tetap ada di repo bila
+> ingin diaktifkan nanti.
 
 ### Bar & UI
 
@@ -67,12 +69,14 @@ Swaywm dotfiles.
 | `noto-fonts` | Base font family |
 
 ```bash
-sudo pacman -S sway swayidle swaylock swaybg waybar mako rofi kitty \
+sudo pacman -S sway waybar mako rofi kitty \
   grim slurp wl-clipboard cliphist pavucontrol brightnessctl \
-  polkit-gnome blueman network-manager-applet gnome-calculator \
+  polkit-gnome blueman networkmanager network-manager-applet \
+  gnome-calculator playerctl \
   xdg-desktop-portal xdg-desktop-portal-gtk python3 \
   papirus-icon-theme ttf-nerd-fonts-symbols noto-fonts \
-  ttf-ubuntu-font-family ttf-jetbrains-mono
+  ttf-ubuntu-font-family ttf-jetbrains-mono \
+  qt5ct qt6ct lightdm-gtk-greeter
 
 # Arc-Dark build from source (jnsh fork, supports GTK4):
 #   git clone --depth 1 https://github.com/jnsh/arc-theme /tmp/arc-theme
@@ -107,12 +111,16 @@ cd ~/dotfiles
 |---|---|
 | `$mod+Return` | Open terminal (kitty) |
 | `$mod+d` | App launcher (rofi) |
-| `$mod+Escape` | Lock screen |
 | `$mod+Shift+x` | Power menu (shutdown/restart/logout) |
 | `$mod+Shift+q` | Close window |
 | `$mod+Shift+e` | Exit sway |
 | `$mod+Shift+c` | Reload config |
-| `$mod+Shift+r` | Restart sway |
+| `$mod+Shift+r` | Restart komponen desktop (reload config + restart waybar/mako/cliphist) |
+
+> **Catatan lock screen:** `$mod+Escape` (swaylock) dan idle timeout **tidak**
+> diaktifkan di `sway/config` — sengaja, laptop tidak pernah ditinggal menyala.
+> File `swaylock/config` tetap ada di repo untuk dipakai nanti, tapi paket
+> `swaylock` tidak perlu terinstal.
 
 ### Audio & Brightness
 
@@ -141,15 +149,19 @@ cd ~/dotfiles
 
 ### Display Management
 
+Tiga mode tampilan layar, dipilih lewat `sway/scripts/display-mode.sh`:
+
+| Key | Mode | Arti |
+|---|---|---|
+| `$mod+F4` | **mirror** | Semua workspace tampil identik di kedua layar (kedua output di posisi & resolusi yang sama) |
+| `$mod+F5` | **extend** | Workspace 1-5 di panel laptop, workspace 6-10 di layar eksternal |
+| `$mod+F6` | **laptop** | Batalkan mirror & extend — layar eksternal dimatikan, semua workspace kembali ke laptop |
+
 | Key | Action |
 |---|---|
+| `$mod+Shift+F4` | Workspace aktif pindah ke layar lain (tekan 2x = balik) |
 | `$mod+Shift+d` | Toggle laptop ↔ mirror external |
 | `$mod+Alt+d` | Toggle laptop ↔ mirror external |
-| `$mod+F1` | Mirror to projector |
-| `$mod+F2` | Extend right |
-| `$mod+F3` | Extend left |
-| `$mod+F4` | External display only |
-| `$mod+F5` | Internal display only |
 | `XF86Display` | Toggle laptop ↔ mirror (Fn key) |
 
 ### Window Focus
@@ -209,9 +221,11 @@ dotfiles/
 │   ├── config
 │   └── scripts/
 │       ├── blueman-applet-headless.sh
-│       ├── display-switcher.sh
+│       ├── display-mode.sh
 │       ├── display-toggle.sh
-│       └── power-menu.sh
+│       ├── power-menu.sh
+│       ├── restart-desktop.sh
+│       └── test-display-mode.sh
 ├── waybar/
 │   ├── config.jsonc
 │   ├── style.css
@@ -227,10 +241,17 @@ dotfiles/
 ├── rofi/
 │   ├── config.rasi
 │   └── themes/polybar-arc.rasi
-├── gtk-3.0/settings.ini
+├── lightdm/
+│   ├── lightdm-gtk-greeter.conf
+│   └── lightdm-gtk-greeter.css
+├── macOS-White/          # cursor theme (symlink ke ~/.local/share/icons)
+├── gtk-3.0/
+│   ├── settings.ini
+│   └── bookmarks
 ├── gtk-4.0/settings.ini
 ├── qt5ct/qt5ct.conf
 ├── qt6ct/qt6ct.conf
 ├── environment.d/desktop.conf
+├── project.md
 └── gtkrc-2.0
 ```

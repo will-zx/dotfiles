@@ -3,16 +3,42 @@
 
 pick_wifi() {
     local raw choice ssid sec wpa rsn pass out conn rc
-    raw=$(nmcli -t -f IN-USE,SSID,SECURITY,WPA-FLAGS,RSN-FLAGS,SIGNAL dev wifi list --rescan yes 2>/dev/null | sed 's/\\:/_/g')
+    raw=$(nmcli -t -f IN-USE,SSID,SECURITY,WPA-FLAGS,RSN-FLAGS,SIGNAL dev wifi list --rescan yes 2>/dev/null)
     [ -z "$raw" ] && return
-    choice=$(printf '%s\n' "$raw" | awk -F: '
+    # Catatan: nmcli -t meng-escape ':' sebagai '\:'. Field harus di-split
+    # pada ':' yang TIDAK ter-escape, lalu di-unescape saat dipakai.
+    choice=$(printf '%s\n' "$raw" | awk '
+        function split_escaped(str, out,   i, c, cur, n) {
+            n = 0; cur = ""
+            for (i = 1; i <= length(str); i++) {
+                c = substr(str, i, 1)
+                if (c == "\\" && i < length(str)) {
+                    cur = cur c substr(str, i + 1, 1)
+                    i++
+                    continue
+                }
+                if (c == ":") { out[++n] = cur; cur = ""; continue }
+                cur = cur c
+            }
+            out[++n] = cur
+            return n
+        }
+        function unescape(s) {
+            gsub(/\\:/, ":", s)
+            gsub(/\\\\/, "\\", s)
+            return s
+        }
         function label(s, w, r) {
             if (s == "--") return "open"
             if (tolower(w) ~ /802.1x/ || tolower(r) ~ /802.1x/) return s " ent"
             return s
         }
-        NF >= 6 && $2 != "" && !seen[$2]++ {
-            printf "%s    [%s | %s%%]\n", $2, label($3, $4, $5), $6
+        {
+            n = split_escaped($0, f)
+            if (n < 6 || f[2] == "") next
+            if (seen[f[2]]++) next
+            ssid = unescape(f[2])
+            printf "%s    [%s | %s%%]\n", ssid, label(f[3], f[4], f[5]), f[6]
         }' | rofi -dmenu -p "WiFi: ")
     [ -z "$choice" ] && return
     ssid=$(printf '%s\n' "$choice" | sed 's/    \[.*//')
@@ -20,7 +46,32 @@ pick_wifi() {
     if nmcli -t -f NAME connection show | grep -qx "$ssid"; then
         out=$(nmcli dev wifi connect "$ssid" 2>&1); rc=$?
     else
-        info=$(printf '%s\n' "$raw" | awk -F: -v s="$ssid" '$2==s {print $3"|"$4"|"$5; exit}')
+        info=$(printf '%s\n' "$raw" | awk '
+            function split_escaped(str, out,   i, c, cur, n) {
+                n = 0; cur = ""
+                for (i = 1; i <= length(str); i++) {
+                    c = substr(str, i, 1)
+                    if (c == "\\" && i < length(str)) {
+                        cur = cur c substr(str, i + 1, 1)
+                        i++
+                        continue
+                    }
+                    if (c == ":") { out[++n] = cur; cur = ""; continue }
+                    cur = cur c
+                }
+                out[++n] = cur
+                return n
+            }
+            function unescape(s) {
+                gsub(/\\:/, ":", s)
+                gsub(/\\\\/, "\\", s)
+                return s
+            }
+            {
+                n = split_escaped($0, f)
+                if (n < 6) next
+                if (unescape(f[2]) == s) { print f[3] "|" f[4] "|" f[5]; exit }
+            }' -v s="$ssid")
         sec=${info%%|*}
         wpa=${info#*|}; wpa=${wpa%%|*}
         rsn=${info##*|}

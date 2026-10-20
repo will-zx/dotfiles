@@ -33,11 +33,11 @@ for o in json.load(sys.stdin):
 if [ "$EXT_ACTIVE" = "yes" ]; then
     # External aktif → matikan, kembali ke laptop only
     swaymsg output "$EXTERNAL" disable
-    swaymsg output "$INTERNAL" enable mode --get-preferred position 0 0
+    swaymsg output "$INTERNAL" enable position 0 0
     notify-send "Display" "Switch ke laptop only"
 else
     # External tidak aktif → mirror
-    swaymsg output "$EXTERNAL" enable mode --get-preferred position 0 0
+    swaymsg output "$EXTERNAL" enable position 0 0
     swaymsg output "$INTERNAL" position 0 0
     notify-send "Display" "Mirror: $EXTERNAL"
 fi

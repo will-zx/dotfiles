@@ -57,6 +57,7 @@ unlink_or_restore "$XDG_CONFIG_HOME/kitty/kitty.conf"
 # GTK
 unlink_or_restore "$HOME/.gtkrc-2.0"
 unlink_or_restore "$XDG_CONFIG_HOME/gtk-3.0/settings.ini"
+unlink_or_restore "$XDG_CONFIG_HOME/gtk-3.0/bookmarks"
 unlink_or_restore "$XDG_CONFIG_HOME/gtk-4.0/settings.ini"
 
 # Qt (qt5ct / qt6ct)
@@ -65,6 +66,19 @@ unlink_or_restore "$XDG_CONFIG_HOME/qt6ct/qt6ct.conf"
 
 # Environment
 unlink_or_restore "$XDG_CONFIG_HOME/environment.d/desktop.conf"
+
+# macOS-White cursor theme (symlink, bukan file config)
+CURSOR_LINK="$HOME/.local/share/icons/macOS-White"
+if [ -L "$CURSOR_LINK" ]; then
+    rm "$CURSOR_LINK"
+    echo "  removed symlink $CURSOR_LINK"
+    if [ -e "$CURSOR_LINK.bak" ]; then
+        mv "$CURSOR_LINK.bak" "$CURSOR_LINK"
+        echo "  restored $CURSOR_LINK.bak → $CURSOR_LINK"
+    fi
+else
+    echo "  skipped $CURSOR_LINK (not a symlink)"
+fi
 
 echo ""
 echo "Done. Reload sway or log out to apply."

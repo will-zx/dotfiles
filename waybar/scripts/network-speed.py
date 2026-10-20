@@ -9,10 +9,27 @@ UP_ICON = "\u2191"
 
 
 def find_iface():
+    # Prioritas: interface yang jadi default route (paling representatif).
+    try:
+        with open("/proc/net/route") as f:
+            next(f)  # header
+            for line in f:
+                fields = line.split()
+                # Destination 00000000 = default route
+                if len(fields) > 2 and fields[1] == "00000000":
+                    return fields[0]
+    except (OSError, StopIteration):
+        pass
+
+    # Fallback: interface fisik yang sedang 'up'.
+    virtual = ("docker", "veth", "br-", "virbr", "tun", "tap", "lo")
     for path in sorted(glob.glob("/sys/class/net/*/operstate")):
+        name = path.split("/")[4]
+        if name.startswith(virtual):
+            continue
         with open(path) as f:
             if f.read().strip() == "up":
-                return path.split("/")[4]
+                return name
     for name in ("wlp4s0", "wlan0", "eth0", "eno1"):
         if os.path.exists(f"/sys/class/net/{name}"):
             return name

@@ -52,8 +52,15 @@ set $indicator              #5294E2
 exec --no-startup-id /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
 
 # Background Wallpaper (native sway, menggantikan feh)
-#output * bg $HOME/Pictures/wp/wp8.png fill
+# Path wallpaper per-user, pakai $HOME agar portabel antar mesin.
 output * bg $HOME/Pictures/wallpaper/Joey-Jordison.jpg fill
+
+# CATATAN: jangan pakai 'workspace "N" output <output>' di sini.
+# Perintah itu bukan sekadar "pin", tapi juga memberi NAMA workspace pertama
+# yang dibuat sway di output tersebut. Efeknya: sway boot langsung ke
+# workspace "6" (bukan "1"), persis seperti yang terjadi sebelumnya.
+# Pemisahan workspace 1-5 (laptop) vs 6-10 (eksternal) ditangani saat
+# runtime oleh sway/scripts/display-mode.sh (mode extend).
 
 # blueman-applet (dibutuhkan blueman-manager) tanpa ikon tray
 exec --no-startup-id ~/.config/sway/scripts/blueman-applet-headless.sh
@@ -85,7 +92,9 @@ exec --no-startup-id sh -c 'pgrep -x mako >/dev/null 2>&1 || mako'
 
 
 # cliphist: merekam semua salinan ke history via wl-paste --watch
-exec_always --no-startup-id wl-paste --watch cliphist store
+# Pakai exec_always + guard pgrep supaya reload config TIDAK menypawn
+# watcher kedua (histori clipboard jadi duplikat & proses menumpuk).
+exec_always --no-startup-id sh -c 'pgrep -x wl-paste >/dev/null 2>&1 || wl-paste --watch cliphist store'
 
 # ==============================================================================
 # 3. WINDOW LOOKS & BEHAVIOR (Estetika & Tampilan Jendela)
@@ -118,9 +127,11 @@ client.focused_inactive  $inactive-bg-color  $inactive-bg-color  $inactive-text-
 client.urgent            $urgent-bg-color    $urgent-bg-color    $urgent-text-color    $indicator
 
 # Enable Floating Mode for Specific Programs
+for_window [class="DesktopEditors" instance="DesktopEditors" title="Open Document"] floating enable, resize set 670 702
 for_window [class="VirtualBox" instance="VirtualBox" title="New Virtual Machine"] floating enable
-for_window [class="steam" instance="steamwebhelper" title="Steam Settings"] floating enable
 for_window [class="steam" instance="steamwebhelper"] floating disable
+for_window [class="steam" instance="steamwebhelper" title="Steam Settings"] floating enable
+for_window [class="bitwarden"] floating enable, resize set 600 689
 for_window [class="ibus"] floating enable
 
 # Aturan untuk aplikasi Wayland-native (class tidak cocok, pakai app_id)
@@ -136,15 +147,19 @@ for_window [app_id="blueman-manager" title="blueman"] floating enable
 for_window [app_id="Zotero" title="Software Update"] floating enable
 for_window [app_id="Zotero" title="Zotero Settings"] floating enable
 for_window [app_id="xarchiver"] floating enable, resize set 800 600
-for_window [app_id="xdg-desktop-portal-gtk"] flating enable
+for_window [app_id="Zotero" title="Import"] floating enable
+for_window [app_id="xdg-desktop-portal-gtk"] floating enable
 for_window [app_id="simplescreenrecorder"] floating enable
 for_window [app_id="org.gnome.Calculator"] floating enable
 for_window [app_id="kitty" title="^.*"] floating disable
 for_window [app_id="qt5ct"] floating enable
 for_window [app_id="qt6ct"] floating enable
-
+for_window [app_id="com.android.webcam"] floating enable
 # By title
 for_window [title="Task Manager - Chromium"] floating enable
+for_window [class="zoom" instance="zoom" title="annotate_toolbar"] floating enable
+for_window [app_id="Zotero" title="Citation Dialog"] floating enable
+for_window [app_id="pcmanfm" title="Confirm File Replacing"] floating enable
 
 # ==============================================================================
 # 4. HARDWARE CONTROLS (Media Keys / Kontrol Perangkat Keras)
@@ -164,17 +179,19 @@ bindsym XF86MonBrightnessUp exec --no-startup-id brightnessctl set +5%
 bindsym XF86MonBrightnessDown exec --no-startup-id brightnessctl set 5%-
 
 # ==============================================================================
-# 4b. DISPLAY MANAGEMENT (Mirror / Extend / Proyektor)
+# 4. DISPLAY / MULTI-MONITOR
 # ==============================================================================
-# Toggle display: laptop only <-> mirror external
+# Toggle cepat laptop <-> mirror external
 bindsym $mod+Alt+d exec --no-startup-id ~/.config/sway/scripts/display-toggle.sh
 
-# Display mode presets (saat projector terhubung)
-bindsym $mod+F1 exec --no-startup-id ~/.config/sway/scripts/display-switcher.sh mirror          # Mirror ke proyektor
-bindsym $mod+F2 exec --no-startup-id ~/.config/sway/scripts/display-switcher.sh extend-right    # Extend ke kanan
-bindsym $mod+F3 exec --no-startup-id ~/.config/sway/scripts/display-switcher.sh extend-left     # Extend ke kiri
-bindsym $mod+F4 exec --no-startup-id ~/.config/sway/scripts/display-switcher.sh external-only   # Proyektor only
-bindsym $mod+F5 exec --no-startup-id ~/.config/sway/scripts/display-switcher.sh internal-only   # Laptop only
+# Tiga mode tampilan layar:
+#   F4  mirror  — semua workspace tampil identik di kedua layar
+#   F5  extend  — workspace 1-5 di laptop, 6-10 di layar eksternal
+#   F6  laptop  — batalkan mirror/extend, layar eksternal dimatikan
+bindsym $mod+F4 exec --no-startup-id ~/.config/sway/scripts/display-mode.sh mirror   # Mirror semua workspace
+bindsym $mod+F5 exec --no-startup-id ~/.config/sway/scripts/display-mode.sh extend   # Extend: 1-5 laptop, 6-10 eksternal
+bindsym $mod+F6 exec --no-startup-id ~/.config/sway/scripts/display-mode.sh laptop   # Laptop saja
+bindsym $mod+Shift+F4 exec --no-startup-id ~/.config/sway/scripts/display-mode.sh workspace-toggle  # Workspace aktif pindah ke layar lain
 
 # Toggle display dengan tombol Display (F7)
 bindsym XF86Display exec --no-startup-id ~/.config/sway/scripts/display-toggle.sh
@@ -188,18 +205,23 @@ bindsym XF86Display exec --no-startup-id ~/.config/sway/scripts/display-toggle.s
 # reload the configuration file
 bindsym $mod+Shift+c reload
 
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
-bindsym $mod+Shift+r restart
+# restart komponen desktop (reload config + restart helper services)
+# CATATAN: sway 1.12 tidak punya perintah 'restart' seperti i3, dan wlroots
+# tidak mendukung re-exec compositor, jadi 'restart sway' penuh tidak bisa
+# dilakukan dari dalam sway. Perintah 'restart' selalu error
+# "Unknown/invalid command 'restart'".
+# Untuk compositor penuh: $mod+Shift+e (exit) lalu login lagi.
+bindsym $mod+Shift+r exec ~/.config/sway/scripts/restart-desktop.sh
 
 # exit sway
-bindsym $mod+Shift+e exec sway-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway?' -B 'Yes, exit sway' 'swaymsg exit'
+bindsym $mod+Shift+e exec swawnag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway?' -B 'Yes, exit sway' 'swaymsg exit'
 
 # start a terminal
 bindsym $mod+Return exec kitty
 
 # start rofi (a program launcher)
-bindcode $mod+40 exec "rofi -modi drun,run -show drun -show-icons -icon-theme Papirus-Dark"
-#bindcode $mod+40 exec "rofi -modi drun,run -show drun -show-icons -icon-theme Arc"
+# Pakai bindsym (bukan bindcode) supaya mengikuti tata letak keyboard aktif.
+bindsym $mod+d exec "rofi -modi drun,run -show drun -show-icons -icon-theme Papirus-Dark"
 
 # pavucontrol
 bindsym $mod+Shift+v exec --no-startup-id pavucontrol

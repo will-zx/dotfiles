@@ -64,6 +64,20 @@ rm -f "$HOME/.local/share/icons/macOS-White"
 ln -sf "$DOTFILES/macOS-White" "$HOME/.local/share/icons/macOS-White"
 echo "  linked cursor theme → $HOME/.local/share/icons/macOS-White"
 
+# LightDM greeter — butuh root, jadi opsional & tidak memblokir install.
+# Greeter membaca CSS dari /etc/lightdm/lightdm-gtk-greeter.css
+if [ "$(id -u)" -eq 0 ]; then
+    install -Dm644 "$DOTFILES/lightdm/lightdm-gtk-greeter.conf" \
+        /etc/lightdm/lightdm-gtk-greeter.conf
+    install -Dm644 "$DOTFILES/lightdm/lightdm-gtk-greeter.css" \
+        /etc/lightdm/lightdm-gtk-greeter.css
+    echo "  installed lightdm greeter config + css → /etc/lightdm/"
+else
+    echo "  [skip] lightdm greeter (butuh root). Jalankan manual:"
+    echo "         sudo install -Dm644 $DOTFILES/lightdm/lightdm-gtk-greeter.conf /etc/lightdm/lightdm-gtk-greeter.conf"
+    echo "         sudo install -Dm644 $DOTFILES/lightdm/lightdm-gtk-greeter.css  /etc/lightdm/lightdm-gtk-greeter.css"
+fi
+
 echo ""
 echo "Done. Reload sway: \$mod+Shift+c"
 echo "Reload env: systemctl --user import-environment; " \
