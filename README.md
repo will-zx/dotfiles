@@ -1,6 +1,6 @@
 # Dotfiles
 
-Swaywm dotfiles.
+Dotfile for Swaywm on Arch linux
 
 ![Screenshot desktop sway dengan waybar, rofi launcher, dan wallpaper Tux](docs/home.png)
 
@@ -42,7 +42,10 @@ kitty, Opencode, dan pear-desktop. Wallpaper `wallpapers/wp6.jpg`.*
 
 | Package | Description |
 |---|---|
+| `pipewire` | Audio stack |
+| `pipewire-alsa` | Drop-in replacement for the PulseAudio daemon |
 | `pavucontrol` | PulseAudio volume control GUI |
+
 
 ### Hardware & System
 
@@ -81,7 +84,8 @@ sudo pacman -S sway waybar mako rofi kitty \
   xdg-desktop-portal xdg-desktop-portal-gtk python3 \
   papirus-icon-theme ttf-nerd-fonts-symbols noto-fonts \
   ttf-ubuntu-font-family ttf-jetbrains-mono \
-  qt5ct qt6ct lightdm-gtk-greeter
+  qt5ct qt6ct lightdm-gtk-greeter \
+  pipewire pipewire-alsa pavucontrol
 
 # Arc-Dark build from source (jnsh fork, supports GTK4):
 #   git clone --depth 1 https://github.com/jnsh/arc-theme /tmp/arc-theme
